@@ -34,7 +34,8 @@ text_array = ['http://risovach.ru/upload/2013/12/mem/freyd_38227511_orig_.jpeg',
 `Při příjímacím pohovoru do zaměstnání zazněl i dotaz: "Jak dlouho jste byl na minulém pracovišti?"
 Rovných deset let!" pyšně odpoví adept
 "A proč jste odešel?"
-"No, ona byla totiž vyhlášena amnestie.`]
+"No, ona byla totiž vyhlášena amnestie.`,
+'о г-спади']
 
 
 module.exports.text_array = text_array
