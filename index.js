@@ -12,11 +12,8 @@ var bot = new TelegramBot(token, { polling: true });
 
 // Listen for any kind of message. There are different kinds of
 // messages.
-text_array = ['http://risovach.ru/upload/2013/12/mem/freyd_38227511_orig_.jpeg', 'вот это было на 5', 'я вот только только тоблероне сточил', 'может забить хуй и уйти в фул-стак жс ?', 'кто там в ебучем кз\nпролейте свет', 'я блять не выспался\nвообще', 'я пошёл в зал', 'жрать хочется', 'Слава Украине', 'мёда закину', 'мёд не спас', 'пойду кофей делать', 'кофемашина сломалась', 'пиздец', 'пойду ебану шоколадку с орехами', 'ты тупой кочка', 'бля, сегодня приседать', 'главное что?\n правильно! \n ебашилово!', 'потрясу пиской у братюней перед ебалом', 'чехлы вообще на эту тему не парятся', 'мне сейчас пиздец', 'ща срака взорвётся', 'остановись', 'всё хуйня, зп хуйня, главное %', 'слоооожна', 'ано', 'так йо', 'мимими', 'я даже работать не буду\nпосижу пожру, кофе попью', 'Россия в нас', 'Добрый баян', 'Сегодня день ног!', 'Бля, надо чештину подучить', `Při příjímacím pohovoru do zaměstnání zazněl i dotaz: "Jak dlouho jste byl na minulém pracovišti?"
-Rovných deset let!" pyšně odpoví adept
-"A proč jste odešel?"
-"No, ona byla totiž vyhlášena amnestie.`]
 
+var phrases = require('./phrases')
 
 func_array = [getRandomFC, getRandomHannibal, getRandomStalin, getRandomFC, getRandomBBT]
 
@@ -43,11 +40,11 @@ function sendRandom(chatId, bash, quote) {
 		console.log('getRandomPhrase()')
 	rand_promise.then(result => {
 		bot.sendMessage(chatId,result);
-		// if (timing)
-		// 	clearTimeout(timing);
-		// timing = setTimeout(() => { 
-		// 	sendRandom(chatId) 
-		// }, 60 * 1000 * 60)		
+		if (timing)
+			clearTimeout(timing);
+		timing = setTimeout(() => { 
+			sendRandom(chatId) 
+		}, 60 * 1000 * 60)		
 	})
 }
 
@@ -55,7 +52,7 @@ var previous = undefined
 function getRandomPhrase() {
 	return new Promise((resolve, reject) => {
 		while (true) {
-			var rand = text_array[Math.floor(Math.random() * text_array.length)]
+			var rand = phrases.text_array[Math.floor(Math.random() * phrases.text_array.length)]
 			if (rand != previous) {
 				previous = rand
 				break
