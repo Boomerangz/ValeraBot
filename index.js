@@ -1,38 +1,42 @@
 var request = require('request');
-let cheerio = require('cheerio')
-let iconv = require('iconv')
+var cheerio = require('cheerio')
+var iconv = require('iconv')
 var entities = require('html-entities').XmlEntities;
 var TelegramBot = require('node-telegram-bot-api');
 
 // replace the value below with the Telegram token you receive from @BotFather
-var token = 'YOUR_TOKEN';
-
-// Create a bot that uses 'polling' to fetch new updates
-var bot = new TelegramBot(token, { polling: true });
+var token = '308299901:AAFqiq69ChLIW9LHNGoRmUF4bqKO5j_jWZs';
 
 // Listen for any kind of message. There are different kinds of
 // messages.
 
 var phrases = require('./phrases')
 
-func_array = [getRandomFC, getRandomHannibal, getRandomStalin, getRandomFC, getRandomBBT]
+var func_array = [getRandomFC, getRandomHannibal, getRandomStalin, getRandomFC, getRandomBBT]
 
 
+// Create a bot that uses 'polling' to fetch new updates
+var bot = new TelegramBot(token, { polling: true });
 bot.on('message', function (msg) {
 	console.log(msg)
 	var chatId = msg.chat.id;
 	var bash = msg.text.indexOf('bash') >= 0
 	var quote = msg.text.indexOf('цитат') >= 0
-	sendRandom(chatId, bash, quote)
+	var russ = msg.text.toLowerCase().indexOf('росси') >= 0
+	sendRandom(chatId, bash, quote, russ)
 });
+   
+
+
 
 var timing = undefined
-function sendRandom(chatId, bash, quote) {
-	if (Math.random() > 0.95 || quote) {
+function sendRandom(chatId, bash, quote, russ) {
+	if (Math.random() > 0.95 || russ) { 
+		rand_promise = getRandomPutin()
+	} else if (Math.random() > 0.95 || quote) {
 		rand_promise = func_array[Math.floor(Math.random() * func_array.length)]()
 	}	
-	else if (Math.random() > 0.95
-	 || bash) {
+	else if (Math.random() > 0.95 || bash) {
 		rand_promise = getRandomBash()
 		console.log('getRandomBash()')
 	} else
@@ -74,7 +78,7 @@ function getRandomBash() {
 				body = new Buffer(body, 'binary');
 				conv = new iconv.Iconv('windows-1251', 'utf8');
 				body = conv.convert(body).toString();		
-				let $ = cheerio.load(body)
+				var $ = cheerio.load(body)
 				var myhtml = $.html().replace(/<br>/gm, '\n') // remove all html tags
 				$ = cheerio.load(myhtml)
 				number = Math.round(Math.random()*49)+1
@@ -86,86 +90,44 @@ function getRandomBash() {
 }
 
 
-function getRandomStalin() {
+function getRandomQuote(url, max_page, max_item) {
 	return new Promise((resolve, reject) => {
-		page = Math.round(Math.random()*4)
+		page = Math.round(Math.random()*max_page)
+		url = url+'?page='+page.toString()
+		console.log(url)
 		request({ 
-			uri: 'http://citaty.info/man/iosif-vissarionovich-stalin?page='+page.toString(),
+			uri: url,
 			method: 'GET',
 			encoding: 'utf8'
 		}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {		
 				$ = cheerio.load(body.replace('<br>',''))
-				number = Math.round(Math.random()*10)+1
+				number = Math.round(Math.random()*(10))+1
 				text = $('.field-type-text-with-summary').eq(number).text()
 				resolve(text)
 			}
 		});
 	})	
+}
+
+function getRandomStalin() {
+	return getRandomQuote('http://citaty.info/man/iosif-vissarionovich-stalin', 4, 11)	
 }
 
 function getRandomHannibal() {
-	return new Promise((resolve, reject) => {
-		page = Math.round(Math.random()*7)
-		request({ 
-			uri: 'http://citaty.info/character/gannibal-lekter?page='+page.toString(),
-			method: 'GET',
-			encoding: 'utf8'
-		}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {		
-				$ = cheerio.load(body.replace('<br>',''))
-				number = Math.round(Math.random()*10)+1
-				text = $('.field-type-text-with-summary').eq(number).text()
-				resolve(text)
-			}
-		});
-	})	
+	return getRandomQuote('http://citaty.info/character/gannibal-lekter', 7, 11)	
 }
 
-
-function getRandomFC() {	
-	return new Promise((resolve, reject) => {
-		page = Math.round(Math.random()*9)
-		request({ 
-			uri: 'http://citaty.info/book/chak-palanik-boicovskii-klub?page='+page.toString(),
-			method: 'GET',
-			encoding: 'utf8'
-		}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {		
-				$ = cheerio.load(body.replace('<br>',''))
-				number = Math.round(Math.random()*10)+1
-				text = $('.field-type-text-with-summary').eq(number).text()
-				resolve(text)
-			}
-		});
-	})	
+function getRandomFC() {
+	return getRandomQuote('http://citaty.info/book/chak-palanik-boicovskii-klub', 9, 11)	
 }
 
 function getRandomBBT() {
-	return new Promise((resolve, reject) => {
-		page = Math.round(Math.random()*76)
-		request({ 
-			uri: 'http://citaty.info/serial/teoriya-bolshogo-vzryva-the-big-bang-theory?page='+page.toString(),
-			method: 'GET',
-			encoding: 'utf8'
-		}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {		
-				// body = new Buffer(body, 'binary');
-				// conv = new iconv.Iconv('windows-1251', 'utf8');
-				// body = conv.convert(body).toString();		
-				// let $ = cheerio.load(body)
-				// var myhtml = $.html().replace(/<br>/gm, '\n') // remove all html tags
-				$ = cheerio.load(body.replace('<br>',''))
-				number = Math.round(Math.random()*10)+1
-				text = $('.field-type-text-with-summary').eq(number).text()
-				resolve(text)
-			}
-		});
-	})	
+	return getRandomQuote('http://citaty.info/serial/teoriya-bolshogo-vzryva-the-big-bang-theory', 76, 11)	
 }
 
+function getRandomPutin() {
+	return getRandomQuote('http://citaty.info/man/vladimir-vladimirovich-putin', 7, 11)	
+}
 
-
-// $('h2.title').text('Hello there!')
-// $('h2').addClass('welcome')
 
