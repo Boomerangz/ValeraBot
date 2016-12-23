@@ -3,9 +3,10 @@ var cheerio = require('cheerio')
 var iconv = require('iconv')
 var entities = require('html-entities').XmlEntities;
 var TelegramBot = require('node-telegram-bot-api');
+var token_file = require('./token')
 
 // replace the value below with the Telegram token you receive from @BotFather
-var token = '308299901:AAFqiq69ChLIW9LHNGoRmUF4bqKO5j_jWZs';
+var token = token_file.token
 
 // Listen for any kind of message. There are different kinds of
 // messages.
