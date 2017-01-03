@@ -18,13 +18,51 @@ var func_array = [getRandomFC, getRandomHannibal, getRandomStalin, getRandomFC, 
 
 // Create a bot that uses 'polling' to fetch new updates
 var bot = new TelegramBot(token, { polling: true });
-bot.on('message', function (msg) {
+bot.onText(/\/(.+)/, function (msg) {
 	console.log(msg)
 	var chatId = msg.chat.id;
 	var bash = msg.text.indexOf('bash') >= 0
 	var quote = msg.text.indexOf('цитат') >= 0
 	var russ = msg.text.toLowerCase().indexOf('росси') >= 0
 	sendRandom(chatId, bash, quote, russ)
+});
+
+currencies = {
+  'руб':'RUB',
+  'крон':'CZK',
+  'доллар':'USD',
+  'бакс':'USD',
+  'кц':'CZK',
+  'кч':'CZK',
+  'евро':'EUR'
+}
+
+// Matches "/echo [whatever]"
+bot.onText(/\d+ (?:руб|крон|доллар|бакс|кц|евро)/, function (msg, match) {
+  var chatId = msg.chat.id;
+  console.log(match)
+  match.forEach(elem => {
+    splitted = elem.split(' ')
+    num = parseFloat(splitted[0])
+    currency = splitted[1]
+    if (currencies[currency] != undefined) {
+      currency = currencies[currency]
+      request('http://api.fixer.io/latest', function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        resp = JSON.parse(body)
+        rates = resp.rates
+		rates['EUR'] = 1.0
+        date = resp.date
+        current_rate = rates[currency]
+        converted = num / current_rate
+
+		converted_rub = converted * rates['RUB']
+        bot.sendMessage(chatId, 'по курсу на '+date+'\n'+num.toString()+' '+currency+' = '+converted.toFixed(2)+' EUR = '+converted_rub.toFixed(2)+' RUB' );
+      }
+    })
+    }
+  })
+
 });
    
 
