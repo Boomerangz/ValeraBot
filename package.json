@@ -10,7 +10,8 @@
     "cheerio": "latest",
     "iconv": "latest",
     "html-entities": "latest",
-    "node-telegram-bot-api": "latest"    
+    "node-telegram-bot-api": "0.25.0",
+    "jsdom":"latest"
   },
   "scripts": {
     "start": "node index.js"
