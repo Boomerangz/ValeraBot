@@ -150,8 +150,7 @@ function getRandomQuote(url, max_page, max_item) {
 }
 
 function getRandomStalin() {
-	return 
-	('http://citaty.info/man/iosif-vissarionovich-stalin', 4, 11)	
+	return ('http://citaty.info/man/iosif-vissarionovich-stalin', 4, 11)	
 }
 
 function getRandomHannibal() {
