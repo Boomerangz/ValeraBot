@@ -150,7 +150,8 @@ function getRandomQuote(url, max_page, max_item) {
 }
 
 function getRandomStalin() {
-	return getRandomQuote('http://citaty.info/man/iosif-vissarionovich-stalin', 4, 11)	
+	return 
+	('http://citaty.info/man/iosif-vissarionovich-stalin', 4, 11)	
 }
 
 function getRandomHannibal() {
@@ -167,6 +168,10 @@ function getRandomBBT() {
 
 function getRandomPutin() {
 	return getRandomQuote('http://citaty.info/man/vladimir-vladimirovich-putin', 7, 11)	
+}
+
+function getRandomNietzsche() {
+	return getRandomQuote('http://http://citaty.info/man/fridrih-vilgelm-nicshe', 19, 11)	
 }
 
 
