@@ -19,6 +19,7 @@ const func_array = [getRandomFC, getRandomHannibal, getRandomStalin, getRandomFC
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
 bot.onText(/\/(.+)/, function (msg) {
+	interval = 1;
 	if (msg.text.indexOf('http') == -1) {
 		const chatId = msg.chat.id;
 		const bash = msg.text.indexOf('bash') >= 0;
@@ -31,34 +32,38 @@ bot.onText(/\/(.+)/, function (msg) {
 
 currencies = {
   'руб':'RUB',
-  'крон':'CZK',
+
   'доллар':'USD',
   'бакс':'USD',
+
   'кц':'CZK',
   'кч':'CZK',
+  'крон':'CZK',
+
   'евро':'EUR'
 }
-
+const currencies_regexp = new RegExp("\\d+ (?:"+Object.keys(currencies).join('|')+")");
 // Matches "/echo [whatever]"
-bot.onText(/\d+ (?:руб|крон|доллар|бакс|кц|евро)/, function (msg, match) {
+bot.onText(currencies_regexp, function (msg, match) {
   const chatId = msg.chat.id;
   match.forEach(elem => {
     splitted = elem.split(' ')
     num = parseFloat(splitted[0]);
-    currency = splitted[1];
+    let currency = splitted[1];
     if (currencies[currency] != undefined) {
       currency = currencies[currency];
       request('http://api.fixer.io/latest', function (error, response, body) {
       if (!error && response.statusCode == 200) {
-        resp = JSON.parse(body);
-        rates = resp.rates;
+        const resp = JSON.parse(body);
+        let rates = resp.rates;
 		rates['EUR'] = 1.0;
-        date = resp.date;
-        current_rate = rates[currency];
-        converted = num / current_rate;
-
-		converted_rub = converted * rates['RUB'];
-        bot.sendMessage(chatId, 'по курсу на '+date+'\n'+num.toString()+' '+currency+' = '+converted.toFixed(2)+' EUR = '+converted_rub.toFixed(2)+' RUB' );
+		rates['KZT'] = rates['RUB'] * 5.59;
+        const date = resp.date;
+        const current_rate = rates[currency];
+        const converted = num / current_rate;
+        const required_currencies = ['EUR', 'RUB', 'CZK', 'KZT', 'GBP']
+		const converted_strings = required_currencies.filter(curr => curr!=currency).map(curr => (converted * rates[curr]).toFixed(2) + ' ' + curr).join('\n')
+        bot.sendMessage(chatId, 'по курсу на '+date+'\n'+num.toString()+' '+currency+'\n'+converted_strings);
       }
     })
     }
@@ -88,12 +93,12 @@ function sendRandom(chatId, bash, quote, russ, nietzsche) {
 		bot.sendMessage(chatId,result);
 		if (timer) {
 			clearTimeout(timer);
-			interval = 1;
 		}
 		timer = setTimeout(() => { 
-			sendRandom(chatId);
-			interval *= 2;
-		}, 60 * 1000 * 60 * interval)		
+			sendRandom(chatId);			
+		}, 60 * 60 * 1000 * interval);
+		interval *= 2;
+		console.log(interval);
 	})
 }
 
