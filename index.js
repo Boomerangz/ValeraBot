@@ -3,7 +3,7 @@ const cheerio = require('cheerio')
 const iconv = require('iconv')
 const entities = require('html-entities').XmlEntities;
 const TelegramBot = require('node-telegram-bot-api');
-const token_file = require('./token')
+const token_file = require('./token');
 
 // replace the value below with the Telegram token you receive from @BotFather
 const token = token_file.token;
@@ -26,7 +26,8 @@ bot.onText(/\/(.+)/, function (msg) {
 		const quote = msg.text.indexOf('цитат') >= 0;
 		const russ = msg.text.toLowerCase().indexOf('росси') >= 0;
 		const nietzsche = msg.text.toLowerCase().indexOf('ницше') >= 0;
-		sendRandom(chatId, bash, quote, russ, nietzsche);
+		const advice = msg.text.indexOf('совет') >= 0;
+		sendRandom(chatId, bash, quote, russ, nietzsche, advice);
 	}
 });
 
@@ -77,7 +78,7 @@ bot.onText(currencies_regexp, function (msg, match) {
 let timer = undefined;
 let interval = 1;
 
-function sendRandom(chatId, bash, quote, russ, nietzsche) {
+function sendRandom(chatId, bash, quote, russ, nietzsche, advice) {
 	if (Math.random() > 0.95 || nietzsche) {
 		rand_promise = getRandomNietzsche();
 	} else if (Math.random() > 0.95 || russ) { 
@@ -86,6 +87,8 @@ function sendRandom(chatId, bash, quote, russ, nietzsche) {
 		rand_promise = func_array[Math.floor(Math.random() * func_array.length)]()
 	} else if (Math.random() > 0.95 || bash) {
 		rand_promise = getRandomBash();
+	} else if (Math.random() > 0.95 || advice) {
+		rand_promise = getRandomAdvice();
 	} else {
 		rand_promise = getRandomPhrase();
 	}
@@ -135,6 +138,29 @@ function getRandomBash() {
 				const number = Math.round(Math.random()*49)+1;
 				const text = $('.text').eq(number).text();
 				resolve(text);
+			}
+		});
+	})
+}
+
+
+function getRandomAdvice() {
+	return new Promise((resolve, reject) => {
+		const page = Math.round(Math.random()*10)+1;
+		request({ 
+			uri: 'http://fucking-great-advice.ru/advice/'+page.toString(),
+			method: 'GET',
+			encoding: 'binary'
+		}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {		
+				const body_buffer = new Buffer(body, 'binary');
+				const body_text = body_buffer.toString();
+				let $ = cheerio.load(body_text);
+				const myhtml = $.html().replace(/<br>/gm, '\n'); // remove all html tags
+				$ = cheerio.load(myhtml);
+				const text = $('#advice').text();
+				resolve(text); 
+				
 			}
 		});
 	})
