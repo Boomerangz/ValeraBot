@@ -122,7 +122,7 @@ function getRandomPhrase() {
 
 function getRandomBash() {
 	return new Promise((resolve, reject) => {
-		const page = Math.round(Math.random()*10)+1;
+		const page = Math.round(Math.random()*100)+1;
 		request({ 
 			uri: 'http://bash.im/byrating/'+page.toString(),
 			method: 'GET',
