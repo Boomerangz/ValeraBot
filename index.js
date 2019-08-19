@@ -22,17 +22,18 @@ bot.onText(/\/(.+)/, function (msg) {
 	interval = 1;
 	if (msg.text.indexOf('http') == -1) {
 		const chatId = msg.chat.id;
-		const bash = msg.text.indexOf('bash') >= 0;
+		const bash = false; //msg.text.indexOf('bash') >= 0;
 		const quote = msg.text.indexOf('цитат') >= 0;
 		const russ = msg.text.toLowerCase().indexOf('росси') >= 0;
 		const nietzsche = msg.text.toLowerCase().indexOf('ницше') >= 0;
-		const advice = msg.text.indexOf('совет') >= 0;
+		const advice = false; //msg.text.indexOf('совет') >= 0;
 		sendRandom(chatId, bash, quote, russ, nietzsche, advice);
 	}
 });
 
 currencies = {
   'руб':'RUB',
+   'тенге':'KZT',
 
   'доллар':'USD',
   'бакс':'USD',
@@ -43,9 +44,12 @@ currencies = {
 
   'евро':'EUR'
 }
+let currency_cache;
 const currencies_regexp = new RegExp("\\d+ (?:"+Object.keys(currencies).join('|')+")");
+
 // Matches "/echo [whatever]"
 bot.onText(currencies_regexp, function (msg, match) {
+  console.log(msg);
   const chatId = msg.chat.id;
   match.forEach(elem => {
     splitted = elem.split(' ')
@@ -53,26 +57,37 @@ bot.onText(currencies_regexp, function (msg, match) {
     let currency = splitted[1];
     if (currencies[currency] != undefined) {
       currency = currencies[currency];
-      request('http://api.fixer.io/latest', function (error, response, body) {
-      if (!error && response.statusCode == 200) {
-        const resp = JSON.parse(body);
-        let rates = resp.rates;
-		rates['EUR'] = 1.0;
-		rates['KZT'] = rates['RUB'] * 5.59;
-        const date = resp.date;
-        const current_rate = rates[currency];
-        const converted = num / current_rate;
-        const required_currencies = ['EUR', 'RUB', 'CZK', 'KZT', 'GBP']
-		const converted_strings = required_currencies.filter(curr => curr!=currency).map(curr => (converted * rates[curr]).toFixed(2) + ' ' + curr).join('\n')
-        bot.sendMessage(chatId, 'по курсу на '+date+'\n'+num.toString()+' '+currency+'\n'+converted_strings);
+      if (!currency_cache) {
+       console.log(currency_cache)
+       request('http://data.fixer.io/api/latest?access_key=6be44db1ab8f973992a9c8e3deba6b96', function (error, response, body) {
+         if (!error && response.statusCode == 200) {
+             const resp = JSON.parse(body);
+             currency_cache = resp;
+             currencyResponse(resp, chatId,currency);
+             setTimeout(()=>{currency_cache=null}, 1000*3600)
+         }
+       })
+      } else {
+        console.log('currency_cache')
+        currencyResponse(currency_cache, chatId,currency);
       }
-    })
     }
   })
 
 });
    
 
+function currencyResponse(resp, chatId, currency) {
+	let rates = resp.rates;
+        rates['EUR'] = 1.0;
+        //rates['KZT'] = rates['RUB'] * 5.59;
+        const date = resp.date;
+        const current_rate = rates[currency];
+        const converted = num / current_rate;
+        const required_currencies = ['EUR', 'RUB', 'CZK', 'KZT', 'GBP']
+        const converted_strings = required_currencies.filter(curr => curr!=currency).map(curr => (converted * rates[curr]).toFixed(2) + ' ' + curr).join('\n')
+        bot.sendMessage(chatId, 'по курсу на '+date+'\n'+num.toString()+' '+currency+'\n'+converted_strings);
+}
 
 
 let timer = undefined;
